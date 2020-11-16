@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     post 'save' => 'games#save', as: :save
     patch 'redate' => 'games#redate', as: :redate
     get 'check/:final_id' => 'games#check', as: :check
+    get 'category-titles/:show_date' => 'games#category_titles', as: :category_titles
 
     patch 'filters' => 'users#update_user_filters'
     patch 'sharing' => 'users#update_sharing_status'

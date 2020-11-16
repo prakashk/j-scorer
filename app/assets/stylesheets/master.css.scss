@@ -1340,6 +1340,10 @@ html.no-js #stats-loading-message {
       #rerun-status-select {
         padding: 0 1vw;
       }
+
+      #populate-category-titles:hover {
+          color: $j-light-blue;
+      }
     }
 
     #panel-links {

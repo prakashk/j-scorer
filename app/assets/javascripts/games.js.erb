@@ -437,6 +437,10 @@ $( ".games-game" ).ready( function() {
     setCookie( "gameData", currentGameData );
     getScoresFromCookie();
     populateBoard();
+    var show_date = $showDateValue.val();
+    if (jArchiveCategoryTitles.hasOwnProperty(show_date) && jArchiveCategoryTitles[show_date]) {
+      displayCategoryTitles(jArchiveCategoryTitles[show_date]);
+    }
 
     if ( currentRound === "final" ) {
       $fj.show( "scale", 200, function() {
@@ -587,6 +591,7 @@ $( ".games-game" ).ready( function() {
     // those updates will change ["modified"] to true, enabling the user to
     // save a new game before entering any data, should they so desire.
     updateCookies();
+    resetCategoryTitles();
 
     enableShowDate();
     if ( date ) {
@@ -740,6 +745,65 @@ $( ".games-game" ).ready( function() {
                        .html( "change" );
   }
 
+  function displayCategoryTitles(catTitles) {
+    // populate category titles for the current round
+    currentRound = currentGameData["activeRound"];
+    switch ( currentRound ) {
+      case "round_one_categories":
+        for( var col = 1; col <= 6; col++ ) {
+          var $catTitleP = $( "#cat-title-" + col + " p" );
+          $catTitleP.html( htmlize( catTitles['round_1'][col-1] ) );
+          $catTitleP.data( 'defaultvalue', catTitles['round_1'][col-1] );
+          $catTitleP.blur();
+        }
+        break;
+
+      case "round_two_categories":
+        for( var col = 1; col <= 6; col++ ) {
+          var $catTitleP = $( "#cat-title-" + col + " p" );
+          $catTitleP.html( htmlize( catTitles['round_2'][col-1] ) );
+          $catTitleP.data( 'defaultvalue', catTitles['round_2'][col-1] );
+          $catTitleP.blur();
+        }
+        break;
+
+      case "final":
+        var $catTitleP = $( "#final-cat-title p" );
+        $catTitleP.html( htmlize(catTitles['final'][0]) );
+        $catTitleP.data( 'defaultvalue', catTitles['final'][0] );
+        $catTitleP.blur();
+        break;
+    }
+  }
+
+  function resetCategoryTitles() {
+    for( var col = 1; col <= 6; col++ ) {
+      var $catTitleP = $( "#cat-title-" + col + " p" );
+      $catTitleP.html( htmlize( "CATEGORY " + col ) );
+      $catTitleP.data( 'defaultvalue', "CATEGORY " + col );
+    }
+
+    var $catTitleP = $( "#final-cat-title p" );
+    $catTitleP.html( htmlize( "FINAL CATEGORY" ) );
+    $catTitleP.data( 'defaultvalue', "FINAL CATEGORY" );
+  }
+
+  function getJArchiveCategoryTitles(date) {
+    if (jArchiveCategoryTitles.hasOwnProperty(date) && jArchiveCategoryTitles[date]) {
+      displayCategoryTitles(jArchiveCategoryTitles[date]);
+      return;
+    }
+
+    $.ajax({
+      method: "GET",
+      url: "/category-titles/" + date,
+      success: function( data ) {
+        jArchiveCategoryTitles[date] = data;
+        displayCategoryTitles(jArchiveCategoryTitles[date]);
+      }
+    })
+  }
+  
   function afterSaveHandler( data ) {
     updateCategoryIds( data );
 
@@ -878,6 +942,7 @@ $( ".games-game" ).ready( function() {
   var topRowValues;
   var currentGame = getCookie( "game" );
   var currentGameData = getCookie( "gameData" );
+  var jArchiveCategoryTitles = {};
 
   var currentRound;
   var currentRoundIndex;
@@ -936,6 +1001,11 @@ $( ".games-game" ).ready( function() {
   var $changeShowDateValue = $( "#change-show-date-picker input" );
   var $changeShowDateButton = $( "#change-show-date-button" );
 
+  var $populateCategoryTitlesButton = $( "#populate-category-titles" );
+
+  $populateCategoryTitlesButton.on( "click", function() {
+    getJArchiveCategoryTitles( $showDateValue.val() );
+  });
 
   $( ".clue-box" ).on( "click", function( event ) {
     $currentClue = $( this );
@@ -1190,7 +1260,9 @@ $( ".games-game" ).ready( function() {
       currentGame["final"]["category_title"] = content;
     } else {
       var cat = parseInt( $e.data( "column" ), 10 ) - 1;
-      currentGame[currentRound][cat]["title"] = content;
+      // if (typeof currentRound != "undefined") {
+        currentGame[currentRound][cat]["title"] = content;
+      // }
     }
     updateCookies( content !== oldValue );
   });

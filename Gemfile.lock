@@ -242,6 +242,7 @@ DEPENDENCIES
   mini_backtrace
   minitest-reporters
   momentjs-rails (>= 2.9.0)
+  nokogiri
   pg (~> 0.15)
   puma
   rack-timeout

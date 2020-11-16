@@ -58,6 +58,10 @@ class GamesController < ApplicationController
     render json: { match: '' }
   end
 
+  def category_titles
+    category_titles = helpers.get_jarchive_game_categories_by_airdate(params[:show_date])
+    render json: category_titles
+  end
   private
 
   def category_ids(game)
